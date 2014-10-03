@@ -12,12 +12,20 @@ module Plaid
     end
 
     def auth(type, username, password)
-      post('/auth', type, username, password)
+      payload = auth_payload(type, username, password)
+      post('/auth', payload)
+      parse_response(@response)
+    end
+
+    def auth_step(type, access_token, mfa)
+      payload = mfa_payload(type, access_token, mfa)
+      post('/auth/step', payload)
       parse_response(@response)
     end
 
     def add_account(type,username,password,email)
-      post('/connect',type,username,password,email)
+      payload = auth_payload(type, username, password, email)
+      post('/connect', payload)
       return parse_response(@response)
     end
 
@@ -25,6 +33,7 @@ module Plaid
       get('/entity',id)
       return parse_place(@response)
     end
+
     protected
 
     def parse_response(response)
@@ -68,19 +77,35 @@ module Plaid
 
     private
 
-    def post(path,type,username,password,email = nil)
-      url = base_url + path
-      payload = {
-          :client_id => self.instance_variable_get(:'@customer_id'),
-          :secret => self.instance_variable_get(:'@secret'),
-          :type => type,
-          :credentials => { :username => username, :password => password }
+    def common_payload(type)
+      {
+        :client_id => self.instance_variable_get(:'@customer_id'),
+        :secret => self.instance_variable_get(:'@secret'),
+        :type => type,
       }
+    end
+
+    def auth_payload(type, username, password, email = nil)
+      payload = common_payload(type)
+      payload[:credentials] = { :username => username, :password => password }
 
       if email
         payload[:email] = email
       end
 
+      payload
+    end
+
+    def mfa_payload(type, access_token, mfa)
+      payload = common_payload(type)
+      payload[:access_token] = access_token
+      payload[:mfa] = mfa
+
+      payload
+    end
+
+    def post(path, payload)
+      url = base_url + path
       @response = RestClient.post url, payload
       return @response
     end
