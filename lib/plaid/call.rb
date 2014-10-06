@@ -58,7 +58,9 @@ module Plaid
       else
         @parsed_response = Hash.new
         @parsed_response[:code] = response.code
-        @parsed_response[:message] = response
+        @parsed_response[:message] = response["message"]
+        @parsed_response[:error_code] = response["code"]
+        @parsed_response[:resolve] = response["resolve"]
         return @parsed_response
       end
     end
