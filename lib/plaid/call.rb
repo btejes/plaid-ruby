@@ -23,6 +23,14 @@ module Plaid
       parse_response(@response)
     end
 
+    def get_request(action, access_token)
+      raise ArgumentError, 'action must be passed as string' unless action.is_a?(String)
+
+      params_hash = get_request_params(access_token)
+      get('/' + action, params_hash)
+      parse_response(@response)
+    end
+
     def add_account(type,username,password,email)
       payload = auth_payload(type, username, password, email)
       post('/connect', payload)
@@ -44,6 +52,7 @@ module Plaid
         response = JSON.parse(response)
         @parsed_response[:access_token] = response["access_token"]
         @parsed_response[:accounts] = response["accounts"]
+        @parsed_response[:info] = response["info"]
         @parsed_response[:transactions] = response["transactions"]
         return @parsed_response
       when 201
@@ -87,6 +96,14 @@ module Plaid
       }
     end
 
+    def get_request_params(access_token)
+      {
+        :client_id => self.instance_variable_get(:'@customer_id'),
+        :secret => self.instance_variable_get(:'@secret'),
+        :access_token => access_token,
+      }
+    end
+
     def auth_payload(type, username, password, email = nil)
       payload = common_payload(type)
       payload[:credentials] = { :username => username, :password => password }
@@ -106,15 +123,15 @@ module Plaid
       payload
     end
 
-    def post(path, payload)
+    def post(path, id)
       url = base_url + path
-      @response = RestClient.post url, payload
+      @response = RestClient.post(url, payload)
       return @response
     end
 
-    def get(path,id)
+    def get(path, params_hash)
       url = base_url + path
-      @response = RestClient.get(url,:params => {:entity_id => id})
+      @response = RestClient.get(url, :params => params_hash)
       return @response
     end
 
