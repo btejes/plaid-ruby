@@ -26,8 +26,8 @@ module Plaid
     def get_request(action, access_token)
       raise ArgumentError, 'action must be passed as string' unless action.is_a?(String)
 
-      payload = get_request_payload(access_token)
-      get('/' + action, payload)
+      params_hash = get_request_params(access_token)
+      get('/' + action, params_hash)
       parse_response(@response)
     end
 
@@ -96,11 +96,11 @@ module Plaid
       }
     end
 
-    def get_request_payload(access_token)
+    def get_request_params(access_token)
       {
-          :client_id => self.instance_variable_get(:'@customer_id'),
-          :secret => self.instance_variable_get(:'@secret'),
-          :access_token => access_token,
+        :client_id => self.instance_variable_get(:'@customer_id'),
+        :secret => self.instance_variable_get(:'@secret'),
+        :access_token => access_token,
       }
     end
 
@@ -123,15 +123,15 @@ module Plaid
       payload
     end
 
-    def post(path, payload)
+    def post(path, id)
       url = base_url + path
       @response = RestClient.post(url, payload)
       return @response
     end
 
-    def get(path, payload)
+    def get(path, params_hash)
       url = base_url + path
-      @response = RestClient.get(url, payload)
+      @response = RestClient.get(url, :params => params_hash)
       return @response
     end
 
