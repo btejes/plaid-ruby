@@ -24,9 +24,9 @@ module Plaid
     end
 
     def get_request(resource, access_token)
-      raise ArgumentError, 'action must be passed as string' unless action.is_a?(String)
+      raise ArgumentError, 'resource must be passed as string' unless resource.is_a?(String)
 
-      payload = get_request_paylod(access_token)
+      payload = get_request_payload(access_token)
       post('/' + resource + '/get', payload)
       parse_response(@response)
     end
@@ -123,7 +123,7 @@ module Plaid
       payload
     end
 
-    def post(path, id)
+    def post(path, payload)
       url = base_url + path
       @response = RestClient.post(url, payload)
       return @response
