@@ -31,9 +31,9 @@ module Plaid
       parse_response(@response)
     end
     
-    def upgrade_to(resource, access_token)
+    def upgrade_to(resource, access_token, options = nil)
       raise ArgumentError, 'resource must be passed as string' unless resource.is_a?(String)
-      payload = upgrade_to_payload(resource, access_token)
+      payload = upgrade_to_payload(resource, access_token, options)
       post('/upgrade', payload)
       parse_response(@response)
     end
@@ -122,13 +122,15 @@ module Plaid
       payload
     end
     
-    def upgrade_to_payload(resource, access_token)
-      {
+    def upgrade_to_payload(resource, access_token, options = nil)
+      payload = {
         :client_id => self.instance_variable_get(:'@customer_id'),
         :secret => self.instance_variable_get(:'@secret'),
         :access_token => access_token,
         :upgrade_to => resource,
       }
+      payload.merge!(options) if options
+      payload
     end
 
     def mfa_payload(type, access_token, mfa)
