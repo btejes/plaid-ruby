@@ -129,7 +129,8 @@ module Plaid
         :access_token => access_token,
         :upgrade_to => resource,
       }
-      payload.merge!(options) if options
+      payload.merge!(:options => options) if options
+      puts ">>>>>>>>>>> #{payload}"
       payload
     end
 
