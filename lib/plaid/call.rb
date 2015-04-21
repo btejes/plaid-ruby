@@ -49,6 +49,11 @@ module Plaid
       return parse_place(@response)
     end
 
+    def get_institutions
+      get('/institutions', {})
+      return parse_institutions(@response)
+    end
+
     protected
 
     def parse_response(response)
@@ -91,6 +96,10 @@ module Plaid
       @parsed_response[:phone] = response["meta"]["contact"]["telephone"]
       @parsed_response[:location] = response["meta"]["location"]
       return @parsed_response
+    end
+
+    def parse_institutions(response)
+      return JSON.parse(response)
     end
 
     private
