@@ -4,6 +4,7 @@ module Plaid
   class Customer
 
     BASE_URL = 'https://tartan.plaid.com'
+    PRODUCTION_BASE_URL = 'https://api.plaid.com'
 
     # This initializes our instance variables, and sets up a new Customer class.
     def initialize
@@ -82,21 +83,33 @@ module Plaid
     private
 
     def get(path,access_token,options={})
-      url = BASE_URL + path
+      url = base_url + path
       @response = RestClient.get(url,:params => {:client_id => self.instance_variable_get(:'@customer_id'), :secret => self.instance_variable_get(:'@secret'), :access_token => access_token})
       return @response
     end
 
     def post(path,access_token,options={})
-      url = BASE_URL + path
+      url = base_url + path
       @response = RestClient.post url, :client_id => self.instance_variable_get(:'@customer_id') ,:secret => self.instance_variable_get(:'@secret'), :access_token => access_token, :mfa => @mfa
       return @response
     end
 
     def delete(path,access_token,options={})
-      url = BASE_URL + path
+      url = base_url + path
       @response = RestClient.delete(url,:params => {:client_id => self.instance_variable_get(:'@customer_id'), :secret => self.instance_variable_get(:'@secret'), :access_token => access_token})
       return @response
+    end
+
+    def base_url
+      return @base_url if @base_url
+
+      if self.instance_variable_get(:'@production')
+        @base_url = PRODUCTION_BASE_URL
+      else
+        @base_url = BASE_URL
+      end
+
+      @base_url
     end
   end
 end
