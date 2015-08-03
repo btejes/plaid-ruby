@@ -17,6 +17,12 @@ module Plaid
       parse_response(@response)
     end
 
+    def exchange(public_token)
+      payload = exchange_payload(public_token)
+      post('/exchange_token', payload)
+      parse_response(@response)
+    end
+
     def auth_step(type, access_token, mfa)
       payload = mfa_payload(type, access_token, mfa)
       post('/auth/step', payload)
@@ -172,12 +178,6 @@ module Plaid
       end
 
       @base_url
-    end
-
-    def exchange(public_token)
-      payload = exchange_payload(public_token)
-      post('/exchange_token', payload)
-      parse_response(@response)
     end
 
     def exchange_payload(token)
