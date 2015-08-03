@@ -174,5 +174,19 @@ module Plaid
       @base_url
     end
 
+    def exchange(public_token)
+      payload = exchange_payload(public_token)
+      post('/exchange_token', payload)
+      parse_response(@response)
+    end
+
+    def exchange_payload(token)
+      {
+          :client_id => self.instance_variable_get(:'@customer_id'),
+          :secret => self.instance_variable_get(:'@secret'),
+          :public_token => token
+      }
+    end
+
   end
 end
