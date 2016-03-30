@@ -17,6 +17,12 @@ module Plaid
       parse_response(@response)
     end
 
+    def balance(access_token)
+      payload = get_request_payload(access_token)
+      post('/balance', payload)
+      parse_response(@response)
+    end
+
     def exchange(public_token)
       payload = exchange_payload(public_token)
       post('/exchange_token', payload)
@@ -42,6 +48,12 @@ module Plaid
       payload = upgrade_to_payload(resource, access_token, options)
       post('/upgrade', payload)
       parse_response(@response)
+    end
+
+    def patch_request(resource, access_token, options = nil)
+      raise ArgumentError, 'resource must be passed as string' unless resource.is_a?(String)
+      payload = patch_payload(access_token, options)
+      patch('/' + resource, payload)
     end
 
     def add_account(type,username,password,email)
@@ -148,6 +160,16 @@ module Plaid
       payload
     end
 
+    def patch_payload(access_token, options = nil)
+      payload = {
+        :client_id => self.instance_variable_get(:'@customer_id'),
+        :secret => self.instance_variable_get(:'@secret'),
+        :access_token => access_token
+      }
+      payload.merge!(:options => options) if options
+      payload
+    end
+
     def mfa_payload(type, access_token, mfa)
       payload = common_payload(type)
       payload[:access_token] = access_token
@@ -159,6 +181,12 @@ module Plaid
     def post(path, payload)
       url = base_url + path
       @response = RestClient.post(url, payload)
+      return @response
+    end
+
+    def patch(path, payload)
+      url = base_url + path
+      @response = RestClient.patch(url, payload)
       return @response
     end
 
