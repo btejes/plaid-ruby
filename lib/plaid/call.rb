@@ -72,6 +72,11 @@ module Plaid
       return parse_institutions(@response)
     end
 
+    def get_institution_by_id(id)
+      get('/institutions/' + id, {})
+      return parse_institutions(@response)
+    end
+
     protected
 
     def parse_response(response)
