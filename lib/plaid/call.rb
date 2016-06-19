@@ -35,10 +35,10 @@ module Plaid
       parse_response(@response)
     end
 
-    def get_request(resource, access_token)
+    def get_request(resource, access_token, options = nil)
       raise ArgumentError, 'resource must be passed as string' unless resource.is_a?(String)
 
-      payload = get_request_payload(access_token)
+      payload = get_request_payload(access_token, options)
       post('/' + resource + '/get', payload)
       parse_response(@response)
     end
@@ -135,12 +135,14 @@ module Plaid
       }
     end
 
-    def get_request_payload(access_token)
-      {
+    def get_request_payload(access_token, options = nil)
+      payload = {
         :client_id => self.instance_variable_get(:'@customer_id'),
         :secret => self.instance_variable_get(:'@secret'),
         :access_token => access_token,
       }
+      payload.merge!(:options => options) if options
+      payload
     end
 
     def auth_payload(type, username, password, email = nil)
